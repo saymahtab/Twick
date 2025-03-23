@@ -18,7 +18,7 @@ function PostList({ textareaRef }) {
       {posts.length > 0 ? (
         memoizedPosts.map((post, index) => <Post key={index} post={post} />)
       ) : (
-        <div className="bg-base-200 flex flex-col items-center justify-center h-[calc(100vh-13.3rem)] rounded-md mt-2 w-[calc(100vw-14px)] sm:w-full max-w-screen-sm mx-auto text-white/50 p-6 text-center">
+        <div className="bg-base-300 flex flex-col items-center justify-center h-[calc(100vh-13.3rem)] rounded-md mt-2 w-[calc(100vw-14px)] sm:w-full max-w-xl mx-auto text-white/50 p-6 text-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="w-16 h-16 text-white/30 mb-4"

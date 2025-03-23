@@ -7,6 +7,7 @@ import {
   Sticker,
   X,
 } from "lucide-react";
+
 import { useEffect, useRef, useState } from "react";
 import EmojiPicker from "emoji-picker-react";
 import { useDispatch } from "react-redux";
@@ -16,6 +17,7 @@ function CreatePost({ textareaRef }) {
   const [text, setText] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [pickerPosition, setPickerPosition] = useState("bottom");
 
   const fileInputRef = useRef(null);
   const emojiPickerRef = useRef(null);
@@ -23,13 +25,12 @@ function CreatePost({ textareaRef }) {
   const dispatch = useDispatch();
 
   const handleInput = (e) => {
-    const textarea = textareaRef.current;
-    textarea.style.height = "auto";
-    textarea.style.height = `${textarea.scrollHeight}px`;
+    textareaRef.current.style.height = "auto";
+    textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     setText(e.target.value);
   };
 
-  //close emoji picker if user click outside
+  // Close emoji picker if user clicks outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -40,42 +41,51 @@ function CreatePost({ textareaRef }) {
       }
     };
 
-    document.body.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.body.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   const handleImageClick = () => {
-    fileInputRef.current.click();
+    if (!selectedImage) fileInputRef.current.click();
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.readAsDataURL(file);
       reader.onload = () => {
         setSelectedImage(reader.result);
+        e.target.value = "";
       };
+      reader.readAsDataURL(file);
     }
   };
 
-  const handleEmojiClick = (emojiData) => {
-    setText((prev) => prev + emojiData.emoji);
+  const handleEmojiSelect = (emojiData) => {
+    setText((prevText) => prevText + emojiData.emoji);
     setShowEmojiPicker(false);
   };
 
+  const handleEmojiButtonClick = (e) => {
+    e.stopPropagation();
+    setShowEmojiPicker((prev) => !prev);
+
+    const buttonRect = e.currentTarget.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - buttonRect.bottom;
+    setPickerPosition(spaceBelow < 250 ? "top" : "bottom");
+  };
+
   const handlePost = () => {
-    const textarea = textareaRef.current;
-    textarea.style.height = "auto";
     dispatch(AddPost({ text, image: selectedImage }));
     setText("");
     setSelectedImage(null);
+    textareaRef.current.style.height = "auto";
   };
 
   return (
-    <div className="flex gap-2 bg-base-200 py-5 px-4 rounded-md mt-16 w-[calc(100vw-14px)] sm:w-full max-w-screen-sm mx-auto border-base-content/20">
+    <div className="flex gap-2 bg-base-300 py-5 px-4 rounded-md mt-16 w-[calc(100vw-14px)] sm:w-full max-w-xl mx-auto border-base-content/20">
       <div className="avatar items-start btn btn-ghost btn-circle w-12">
         <div className="w-11 rounded-full hover:opacity-80 transition duration-300">
           <img
@@ -88,7 +98,7 @@ function CreatePost({ textareaRef }) {
         <div className="border-b border-base-content/10">
           <textarea
             ref={textareaRef}
-            className="bg-base-200 w-full resize-none focus:outline-none text-xl p-1 my-1 overflow-hidden"
+            className="bg-base-300 w-full resize-none focus:outline-none text-xl p-1 my-1 overflow-hidden"
             rows="1"
             placeholder="Create a Post!"
             value={text}
@@ -116,7 +126,7 @@ function CreatePost({ textareaRef }) {
           <div className="flex-1">
             <button
               onClick={handleImageClick}
-              className="btn btn-ghost btn-circle h-9 w-9 hover:bg-primary/5"
+              className="btn btn-ghost btn-circle h-9 w-9 hover:bg-primary/5 hover:border-none border-none"
             >
               <Image size={18} className="text-primary" />
             </button>
@@ -128,40 +138,38 @@ function CreatePost({ textareaRef }) {
               onChange={handleFileChange}
             />
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowEmojiPicker((prev) => !prev);
-              }}
-              className="btn btn-ghost btn-circle h-9 w-9 hover:bg-primary/5"
+              ref={emojiPickerRef}
+              onClick={handleEmojiButtonClick}
+              className="btn btn-ghost btn-circle h-9 w-9 hover:bg-primary/5 hover:border-none border-none"
             >
               <Smile size={18} className="text-primary" />
             </button>
             {showEmojiPicker && (
-              <div ref={emojiPickerRef} className="absolute bottom-24">
-                <EmojiPicker
-                  className="z-50"
-                  onEmojiClick={handleEmojiClick}
-                  theme="dark"
-                />
+              <div
+                className={`absolute z-50 ${
+                  pickerPosition === "top" ? "top-18" : ""
+                }`}
+              >
+                <EmojiPicker theme="dark" onEmojiClick={handleEmojiSelect} />
               </div>
             )}
-            <button className="btn btn-ghost btn-circle h-9 w-9 hover:bg-primary/5">
+            <button className="btn btn-ghost btn-circle h-9 w-9 hover:bg-primary/5 hover:border-none border-none">
               <Sticker size={18} className="text-primary" />
             </button>
-            <button className="btn btn-ghost btn-circle h-9 w-9 hover:bg-primary/5">
+            <button className="btn btn-ghost btn-circle h-9 w-9 hover:bg-primary/5 hover:border-none border-none">
               <List size={18} className="text-primary" />
             </button>
-            <button className="btn btn-ghost btn-circle h-9 w-9 hover:bg-primary/5 hidden sm:inline-flex">
+            <button className="btn btn-ghost btn-circle h-9 w-9 hover:bg-primary/5 hidden sm:inline-flex hover:border-none border-none">
               <CalendarCheck2 size={18} className="text-primary" />
             </button>
-            <button className="btn btn-ghost btn-circle h-9 w-9 hover:bg-primary/5 hidden sm:inline-flex">
+            <button className="btn btn-ghost btn-circle h-9 w-9 hover:bg-primary/5 hidden sm:inline-flex hover:border-none border-none">
               <MapPinPlus size={18} className="text-primary" />
             </button>
           </div>
           <div className="w-20">
             <button
               onClick={handlePost}
-              disabled={text.length <= 0 && !selectedImage}
+              disabled={!text.trim() && !selectedImage}
               className="btn btn-primary rounded-full btn-block"
             >
               Post

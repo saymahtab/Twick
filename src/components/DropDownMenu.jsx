@@ -11,7 +11,7 @@ function DropDownMenu({ post, setOpenMenu, setSelectedPost }) {
   };
 
   return (
-    <ul className="dropdown-content menu bg-base-300 rounded-xl z-10 w-52 p-0 py-0 shadow-sm text-zinc-400">
+    <ul className="dropdown-content menu bg-base-200 rounded-xl top-11 z-10 w-52 p-0 py-0 shadow-sm text-zinc-400">
       <li>
         <button className="btn btn-ghost justify-start gap-3 rounded-t-xl px-4 py-6">
           <Bookmark className="size-5" />
