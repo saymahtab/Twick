@@ -146,6 +146,7 @@ function CreatePost({ textareaRef }) {
             </button>
             {showEmojiPicker && (
               <div
+                ref={emojiPickerRef}
                 className={`absolute z-50 ${
                   pickerPosition === "top" ? "top-18" : ""
                 }`}
